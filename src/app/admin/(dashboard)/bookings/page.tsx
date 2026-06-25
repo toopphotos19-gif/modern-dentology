@@ -33,9 +33,10 @@ export default async function AdminBookings() {
                 <td className="px-4 py-3">{new Date(b.date).toLocaleDateString()} {b.time}</td>
                 <td className="px-4 py-3">
                   <form action={async (fd) => { 'use server'; await setBookingStatus(b.id, fd.get('status') as string); }}>
-                    <select name="status" defaultValue={b.status} onChange={(e) => e.currentTarget.form?.requestSubmit()} className="rounded border border-slate-300 px-2 py-1">
+                    <select name="status" defaultValue={b.status} className="rounded border border-slate-300 px-2 py-1">
                       {STATUSES.map((s) => (<option key={s} value={s}>{s}</option>))}
                     </select>
+                    <noscript><button type="submit" className="ml-2 rounded bg-brand-500 px-2 py-1 text-white">Save</button></noscript>
                   </form>
                 </td>
               </tr>

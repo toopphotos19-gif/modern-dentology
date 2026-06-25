@@ -1,7 +1,3 @@
-// Prisma schema for the dental CMS.
-// Every public page reads from these models; the admin panel writes to them.
-// Run `npm run db:push` to create these tables in your Neon database.
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,54 +7,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ---------- Auth / Admin ----------
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String?
-  password  String // bcrypt hash
+  password  String
   role      Role     @default(ADMIN)
   createdAt DateTime @default(now())
 }
 
-enum Role {
-  ADMIN
-  EDITOR
-}
-
-// ---------- Services ----------
 model Service {
-  id          String   @id @default(cuid())
-  slug        String   @unique
+  id          String    @id @default(cuid())
+  slug        String    @unique
   name        String
   shortDesc   String
-  description String   @db.Text
+  description String
   image       String?
   banner      String?
-  benefits    Json? // string[]
-  steps       Json? // { title, description }[]
-  faqs        Json? // { question, answer }[]
-  gallery     Json? // { before, after }[]
-  enabled     Boolean  @default(true)
-  order       Int      @default(0)
+  benefits    Json?
+  steps       Json?
+  faqs        Json?
+  gallery     Json?
+  enabled     Boolean   @default(true)
+  order       Int       @default(0)
   metaTitle   String?
   metaDesc    String?
   keywords    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   bookings    Booking[]
 }
 
-// ---------- Technologies ----------
 model Technology {
   id          String   @id @default(cuid())
   slug        String   @unique
   name        String
   shortDesc   String
-  description String   @db.Text
+  description String
   image       String?
   benefits    Json?
-  videos      Json? // string[] (URLs)
+  videos      Json?
   enabled     Boolean  @default(true)
   order       Int      @default(0)
   metaTitle   String?
@@ -67,30 +55,28 @@ model Technology {
   updatedAt   DateTime @updatedAt
 }
 
-// ---------- Doctors ----------
 model Doctor {
-  id              String   @id @default(cuid())
-  slug            String   @unique
+  id              String    @id @default(cuid())
+  slug            String    @unique
   name            String
   qualification   String?
   experience      String?
-  bio             String?  @db.Text
+  bio             String?
   photo           String?
   certifications  Json?
   awards          Json?
   specializations Json?
-  enabled         Boolean  @default(true)
-  order           Int      @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  enabled         Boolean   @default(true)
+  order           Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
   bookings        Booking[]
 }
 
-// ---------- Testimonials ----------
 model Testimonial {
   id          String   @id @default(cuid())
   patientName String
-  review      String   @db.Text
+  review      String
   rating      Int      @default(5)
   videoUrl    String?
   beforeImage String?
@@ -100,26 +86,24 @@ model Testimonial {
   createdAt   DateTime @default(now())
 }
 
-// ---------- Blog ----------
 model BlogPost {
-  id          String    @id @default(cuid())
-  slug        String    @unique
-  title       String
-  excerpt     String?
-  content     String    @db.Text
-  featured    String?
-  category    String?
-  author      String?
-  published   Boolean   @default(false)
-  publishAt   DateTime?
-  metaTitle   String?
-  metaDesc    String?
-  keywords    String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  title     String
+  excerpt   String?
+  content   String
+  featured  String?
+  category  String?
+  author    String?
+  published Boolean   @default(false)
+  publishAt DateTime?
+  metaTitle String?
+  metaDesc  String?
+  keywords  String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
-// ---------- Gallery ----------
 model GalleryImage {
   id        String   @id @default(cuid())
   url       String
@@ -129,47 +113,37 @@ model GalleryImage {
   createdAt DateTime @default(now())
 }
 
-// ---------- FAQ ----------
 model Faq {
-  id        String   @id @default(cuid())
-  question  String
-  answer    String   @db.Text
-  order     Int      @default(0)
-  enabled   Boolean  @default(true)
+  id       String  @id @default(cuid())
+  question String
+  answer   String
+  order    Int     @default(0)
+  enabled  Boolean @default(true)
 }
 
-// ---------- Appointments ----------
 model Booking {
-  id          String        @id @default(cuid())
-  name        String
-  phone       String
-  email       String
-  date        DateTime
-  time        String
-  message     String?
-  status      BookingStatus @default(PENDING)
-  serviceId   String?
-  service     Service?      @relation(fields: [serviceId], references: [id])
-  doctorId    String?
-  doctor      Doctor?       @relation(fields: [doctorId], references: [id])
-  createdAt   DateTime      @default(now())
+  id        String        @id @default(cuid())
+  name      String
+  phone     String
+  email     String
+  date      DateTime
+  time      String
+  message   String?
+  status    BookingStatus @default(PENDING)
+  serviceId String?
+  doctorId  String?
+  createdAt DateTime      @default(now())
+  doctor    Doctor?       @relation(fields: [doctorId], references: [id])
+  service   Service?      @relation(fields: [serviceId], references: [id])
 }
 
-enum BookingStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  RESCHEDULED
-}
-
-// ---------- Careers ----------
 model Job {
   id           String        @id @default(cuid())
   slug         String        @unique
   title        String
-  description  String        @db.Text
+  description  String
   location     String?
-  type         String? // Full-time / Part-time
+  type         String?
   enabled      Boolean       @default(true)
   createdAt    DateTime      @default(now())
   applications Application[]
@@ -186,8 +160,63 @@ model Application {
   resumeUrl     String?
   status        ApplicationStatus @default(NEW)
   jobId         String?
-  job           Job?              @relation(fields: [jobId], references: [id])
   createdAt     DateTime          @default(now())
+  job           Job?              @relation(fields: [jobId], references: [id])
+}
+
+model SiteSetting {
+  id           String   @id @default("main")
+  heroTitle    String?
+  heroSubtitle String?
+  heroDesc     String?
+  heroImage    String?
+  heroVideo    String?
+  heroBtn1Text String?
+  heroBtn1Link String?
+  heroBtn2Text String?
+  heroBtn2Link String?
+  stats        Json?
+  sectionOrder Json?
+  banners      Json?
+  phone        String?
+  email        String?
+  address      String?
+  mapEmbed     String?
+  facebook     String?
+  instagram    String?
+  youtube      String?
+  whatsapp     String?
+  metaTitle    String?
+  metaDesc     String?
+  keywords     String?
+  updatedAt    DateTime @updatedAt
+  aboutImage   String?
+  aboutText    String?
+}
+
+model Lead {
+  id        String     @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  message   String?
+  source    String?
+  status    LeadStatus @default(NEW)
+  assignee  String?
+  notes     String?
+  createdAt DateTime   @default(now())
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+}
+
+enum BookingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  RESCHEDULED
 }
 
 enum ApplicationStatus {
@@ -196,55 +225,6 @@ enum ApplicationStatus {
   INTERVIEW
   REJECTED
   HIRED
-}
-
-// ---------- Site-wide settings (single row) ----------
-model SiteSetting {
-  id           String @id @default("main")
-  // Hero / homepage
-  heroTitle    String?
-  heroSubtitle String?
-  heroDesc     String? @db.Text
-  heroImage    String?
-  heroVideo    String?
-  heroBtn1Text String?
-  heroBtn1Link String?
-  heroBtn2Text String?
-  heroBtn2Link String?
-  stats        Json? // { label, value }[]
-  sectionOrder Json? // string[]
-  banners      Json?
-  // Contact / social
-  phone        String?
-  email        String?
-  address      String?
-  mapEmbed     String? @db.Text
-  facebook     String?
-  instagram    String?
-  youtube      String?
-  whatsapp     String?
-  // About page
-  aboutText    String? @db.Text
-  aboutImage   String?
-  // Default SEO
-  metaTitle    String?
-  metaDesc     String?
-  keywords     String?
-  updatedAt    DateTime @updatedAt
-}
-
-// ---------- Leads / Inquiries (CRM) ----------
-model Lead {
-  id        String     @id @default(cuid())
-  name      String
-  email     String
-  phone     String?
-  message   String?    @db.Text
-  source    String?
-  status    LeadStatus @default(NEW)
-  assignee  String?
-  notes     String?    @db.Text
-  createdAt DateTime   @default(now())
 }
 
 enum LeadStatus {
