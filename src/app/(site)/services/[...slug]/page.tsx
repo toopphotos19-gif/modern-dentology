@@ -4,6 +4,7 @@ import { Container } from '@/components/ui/Container';
 import { Metadata } from 'next';
 import { CheckCircle2, Clock, Calendar } from 'lucide-react';
 import Link from 'next/link';
+import { BeforeAfterSlider } from '@/components/ui/BeforeAfterSlider';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,17 @@ export default async function ServicePage({ params }: { params: { slug: string[]
   });
 
   if (!service || !service.enabled) notFound();
+
+  const comparisons = await prisma.beforeAfter.findMany({
+    where: {
+      status: 'PUBLISHED',
+      OR: [
+        { treatmentName: { equals: service.name, mode: 'insensitive' } },
+        { category: { name: { equals: service.name, mode: 'insensitive' } } }
+      ]
+    },
+    orderBy: { order: 'asc' }
+  });
 
   const features = (service.features as any[]) || [];
   const gallery = (service.gallery as any[]) || [];
@@ -97,6 +109,30 @@ export default async function ServicePage({ params }: { params: { slug: string[]
                     <div key={i} className="rounded-xl border border-slate-100 p-6 shadow-sm">
                       <h3 className="text-xl font-semibold text-slate-900">{f.title}</h3>
                       <p className="mt-2 text-slate-600">{f.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Before & After comparisons */}
+            {comparisons.length > 0 && (
+              <section className="space-y-6">
+                <h2 className="text-3xl font-bold text-slate-900">Before & After Results</h2>
+                <div className="grid gap-8">
+                  {comparisons.map((c) => (
+                    <div key={c.id} className="space-y-4">
+                      <BeforeAfterSlider
+                        beforeImage={c.beforeImage}
+                        afterImage={c.afterImage}
+                        beforeAlt={c.beforeImageAlt || undefined}
+                        afterAlt={c.afterImageAlt || undefined}
+                        beforeLabel={c.beforeImageCaption || undefined}
+                        afterLabel={c.afterImageCaption || undefined}
+                      />
+                      {c.shortDescription && (
+                        <p className="text-slate-600 text-sm">{c.shortDescription}</p>
+                      )}
                     </div>
                   ))}
                 </div>
