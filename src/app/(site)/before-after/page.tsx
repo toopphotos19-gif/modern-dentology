@@ -1,6 +1,4 @@
 import { prisma } from '@/lib/prisma';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
 import { Container } from '@/components/ui/Container';
 import { BeforeAfterGallery } from '@/components/ui/BeforeAfterGallery';
 
@@ -24,7 +22,6 @@ export default async function BeforeAfterPage() {
 
   return (
     <>
-      <Header />
       <main>
         {/* Hero */}
         <section className="bg-gradient-to-br from-brand-900 via-brand-800 to-brand-700 pt-32 pb-16">
@@ -72,7 +69,6 @@ export default async function BeforeAfterPage() {
           </Container>
         </section>
       </main>
-      <Footer phone={settings?.phone} email={settings?.email} address={settings?.address} />
     </>
   );
 }

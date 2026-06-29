@@ -1,7 +1,5 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
 import { ImageBox } from '@/components/ui/ImagePlaceholder';
 
 export const dynamic = 'force-dynamic';
@@ -13,7 +11,6 @@ export default async function BlogPage() {
   ]);
   return (
     <>
-      <Header />
       <main className="mx-auto max-w-7xl px-4 pb-16 pt-32">
         <h1 className="mb-10 text-4xl font-extrabold text-brand-900">Blog</h1>
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -30,7 +27,6 @@ export default async function BlogPage() {
           {posts.length === 0 && <p className="text-slate-400">No blog posts yet.</p>}
         </div>
       </main>
-      <Footer phone={settings?.phone} email={settings?.email} address={settings?.address} />
     </>
   );
 }

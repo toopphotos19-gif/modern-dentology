@@ -1,6 +1,4 @@
 import { prisma } from '@/lib/prisma';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
 import { ApplicationForm } from '@/components/forms/ApplicationForm';
 
 export const dynamic = 'force-dynamic';
@@ -12,7 +10,6 @@ export default async function CareersPage() {
   ]);
   return (
     <>
-      <Header />
       <main className="mx-auto max-w-3xl px-4 pb-16 pt-32">
         <h1 className="mb-2 text-4xl font-extrabold text-brand-900">Careers</h1>
         <p className="mb-8 text-slate-500">Join the Modern Dentology team.</p>
@@ -30,7 +27,6 @@ export default async function CareersPage() {
         <h2 className="mb-4 text-2xl font-bold text-brand-900">Apply Now</h2>
         <ApplicationForm jobs={jobs.map((j) => ({ id: j.id, title: j.title }))} />
       </main>
-      <Footer phone={settings?.phone} email={settings?.email} address={settings?.address} />
     </>
   );
 }
