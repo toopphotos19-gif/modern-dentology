@@ -7,7 +7,8 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Turn 'Dental Implants' into 'dental-implants' for dynamic URLs.
-export function slugify(input: string) {
+export function slugify(input: string | null | undefined) {
+  if (!input) return '';
   return input
     .toLowerCase()
     .trim()

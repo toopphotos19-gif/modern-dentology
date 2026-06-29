@@ -39,7 +39,12 @@ export function AdminTabs({
         ))}
       </Tabs.List>
       {tabs.map((tab) => (
-        <Tabs.Content key={tab.value} value={tab.value} className="focus:outline-none">
+        <Tabs.Content
+          key={tab.value}
+          value={tab.value}
+          forceMount
+          className="focus:outline-none data-[state=inactive]:hidden"
+        >
           {tab.content}
         </Tabs.Content>
       ))}
