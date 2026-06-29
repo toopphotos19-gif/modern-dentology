@@ -1,9 +1,7 @@
 import { prisma } from '@/lib/prisma';
-import { setBookingStatus } from './actions';
+import { BookingStatusSelect } from '@/components/admin/BookingStatusSelect';
 
 export const dynamic = 'force-dynamic';
-
-const STATUSES = ['PENDING', 'APPROVED', 'REJECTED', 'RESCHEDULED'] as const;
 
 export default async function AdminBookings() {
   const bookings = await prisma.booking.findMany({
@@ -32,12 +30,7 @@ export default async function AdminBookings() {
                 <td className="px-4 py-3">{b.service?.name || '-'}<br /><span className="text-slate-400">{b.doctor?.name || ''}</span></td>
                 <td className="px-4 py-3">{new Date(b.date).toLocaleDateString()} {b.time}</td>
                 <td className="px-4 py-3">
-                  <form action={async (fd) => { 'use server'; await setBookingStatus(b.id, fd.get('status') as string); }} className="flex items-center gap-2">
-                    <select name="status" defaultValue={b.status} className="rounded border border-slate-300 px-2 py-1">
-                      {STATUSES.map((s) => (<option key={s} value={s}>{s}</option>))}
-                    </select>
-                    <button type="submit" className="rounded bg-brand-500 px-3 py-1 text-xs font-semibold text-white transition hover:bg-brand-600">Save</button>
-                  </form>
+                  <BookingStatusSelect bookingId={b.id} currentStatus={b.status} />
                 </td>
               </tr>
             ))}

@@ -7,8 +7,9 @@ import { ImageBox } from '@/components/ui/ImagePlaceholder';
 export const dynamic = 'force-dynamic';
 
 export default async function TechDetail({ params }: { params: { slug: string } }) {
+  const decodedSlug = decodeURIComponent(params.slug);
   const [tech, settings] = await Promise.all([
-    prisma.technology.findUnique({ where: { slug: params.slug } }),
+    prisma.technology.findUnique({ where: { slug: decodedSlug } }),
     prisma.siteSetting.findUnique({ where: { id: 'main' } })
   ]);
   if (!tech || !tech.enabled) notFound();

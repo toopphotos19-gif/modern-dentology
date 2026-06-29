@@ -13,3 +13,157 @@ html {
 body {
   @apply bg-white text-slate-800 antialiased;
 }
+
+/* ─── Dark Mode Support ───────────────────────────────────────── */
+.dark body {
+  @apply bg-slate-900 text-slate-200;
+}
+
+/* ─── Admin Scrollbar ───────────────────────────────────────── */
+.admin-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.admin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.admin-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 dark:bg-slate-600 rounded-full;
+}
+.admin-scrollbar::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-400 dark:bg-slate-500;
+}
+
+/* Hide scrollbar but keep scroll */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ─── Glassmorphism Utility ───────────────────────────────────── */
+.glass {
+  @apply bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl;
+}
+.glass-strong {
+  @apply bg-white/80 dark:bg-slate-800/80 backdrop-blur-2xl;
+}
+
+/* ─── Admin Animations ───────────────────────────────────────── */
+@keyframes admin-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes admin-slide-in {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes admin-scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes admin-count-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes admin-pulse-ring {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+@keyframes admin-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-admin-fade-in {
+  animation: admin-fade-in 0.4s ease-out forwards;
+}
+.animate-admin-slide-in {
+  animation: admin-slide-in 0.4s ease-out forwards;
+}
+.animate-admin-scale-in {
+  animation: admin-scale-in 0.3s ease-out forwards;
+}
+.animate-admin-count-up {
+  animation: admin-count-up 0.6s ease-out forwards;
+}
+
+/* Stagger children */
+.stagger-children > * {
+  opacity: 0;
+  animation: admin-fade-in 0.4s ease-out forwards;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.4s; }
+
+/* Loading shimmer */
+.shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: admin-shimmer 1.5s infinite;
+}
+
+/* ─── Radix Animations ───────────────────────────────────────── */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes zoomOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.95); } }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+
+/* Tailwind animate compat (used by Radix Dialog) */
+.animate-in { animation-duration: 0.2s; animation-fill-mode: both; }
+.animate-out { animation-duration: 0.15s; animation-fill-mode: both; }
+.fade-in-0 { animation-name: fadeIn; }
+.fade-out-0 { animation-name: fadeOut; }
+.zoom-in-95 { animation-name: zoomIn; }
+.zoom-out-95 { animation-name: zoomOut; }
+.slide-in-from-right-5 { animation-name: slideInRight; }
+.slide-in-from-left-1\/2 { animation-name: zoomIn; }
+.slide-in-from-top-\[48\%\] { animation-name: zoomIn; }
+.slide-out-to-left-1\/2 { animation-name: zoomOut; }
+.slide-out-to-top-\[48\%\] { animation-name: zoomOut; }
+
+/* ─── Before & After Slider ──────────────────────────────────── */
+.ba-slider {
+  position: relative;
+  overflow: hidden;
+  cursor: ew-resize;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.ba-slider img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+.ba-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: white;
+  box-shadow: 0 0 12px rgba(0,0,0,0.3);
+  z-index: 10;
+  cursor: ew-resize;
+}
+.ba-handle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}

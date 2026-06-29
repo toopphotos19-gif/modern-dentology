@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -9,18 +10,21 @@ import { SITE } from '@/lib/site';
 
 const NAV = [
   { label: 'Home', href: '/' },
-  { label: 'About', href: '/about' },
   { label: 'Services', href: '/services' },
   { label: 'Doctors', href: '/doctors' },
   { label: 'Technology', href: '/technology' },
   { label: 'Blog', href: '/blog' },
   { label: 'Gallery', href: '/gallery' },
+  { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' }
 ];
 
 export function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+  const isHome = pathname === '/';
+  const forceSolid = !isHome || scrolled;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -34,18 +38,18 @@ export function Header() {
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
       className={`fixed inset-x-0 top-0 z-50 transition-all ${
-        scrolled ? 'bg-white/90 shadow-md backdrop-blur' : 'bg-transparent'
+        forceSolid ? 'bg-white/90 shadow-md backdrop-blur' : 'bg-transparent'
       }`}
     >
       <Container className="flex h-20 items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-500 font-bold text-white">M</span>
-          <span className={`text-xl font-bold ${scrolled ? 'text-brand-900' : 'text-white'}`}>{SITE.name}</span>
+          <span className={`text-xl font-bold ${forceSolid ? 'text-brand-900' : 'text-white'}`}>{SITE.name}</span>
         </Link>
 
         <nav className="hidden items-center gap-7 lg:flex">
           {NAV.map((item) => (
-            <Link key={item.href} href={item.href} className={`text-sm font-medium transition-colors hover:text-brand-500 ${scrolled ? 'text-slate-700' : 'text-white/90'}`}>
+            <Link key={item.href} href={item.href} className={`text-sm font-medium transition-colors hover:text-brand-500 ${forceSolid ? 'text-slate-700' : 'text-white/90'}`}>
               {item.label}
             </Link>
           ))}
@@ -54,7 +58,7 @@ export function Header() {
           </Link>
         </nav>
 
-        <button className={`lg:hidden ${scrolled ? 'text-brand-900' : 'text-white'}`} onClick={() => setOpen(!open)} aria-label="Toggle menu">
+        <button className={`lg:hidden ${forceSolid ? 'text-brand-900' : 'text-white'}`} onClick={() => setOpen(!open)} aria-label="Toggle menu">
           {open ? <X /> : <Menu />}
         </button>
       </Container>

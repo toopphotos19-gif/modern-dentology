@@ -4,35 +4,88 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 
-export async function saveSettings(formData: FormData) {
+async function guard() {
   const session = await auth();
   if (!session) throw new Error('Unauthorized');
+  return session;
+}
+
+function str(fd: FormData, key: string): string | null {
+  const v = fd.get(key);
+  return typeof v === 'string' && v.length ? v : null;
+}
+
+function jsonParse(fd: FormData, key: string) {
+  const raw = str(fd, key);
+  if (!raw) return undefined;
+  try { return JSON.parse(raw); } catch { return undefined; }
+}
+
+export async function saveSiteSettings(formData: FormData) {
+  const session = await guard();
 
   const data = {
-    heroTitle: formData.get('heroTitle') as string,
-    heroSubtitle: formData.get('heroSubtitle') as string,
-    heroDesc: formData.get('heroDesc') as string,
-    heroImage: (formData.get('heroImage') as string) || null,
-    heroVideo: (formData.get('heroVideo') as string) || null,
-    heroBtn1Text: formData.get('heroBtn1Text') as string,
-    heroBtn1Link: formData.get('heroBtn1Link') as string,
-    heroBtn2Text: formData.get('heroBtn2Text') as string,
-    heroBtn2Link: formData.get('heroBtn2Link') as string,
-    phone: formData.get('phone') as string,
-    email: formData.get('email') as string,
-    address: formData.get('address') as string,
-    facebook: formData.get('facebook') as string,
-    instagram: formData.get('instagram') as string,
-    youtube: formData.get('youtube') as string,
-    metaTitle: formData.get('metaTitle') as string,
-    metaDesc: formData.get('metaDesc') as string
+    websiteName: str(formData, 'websiteName'),
+    tagline: str(formData, 'tagline'),
+    headerLogo: str(formData, 'headerLogo'),
+    footerLogo: str(formData, 'footerLogo'),
+    favicon: str(formData, 'favicon'),
+    phone: str(formData, 'phone'),
+    whatsapp: str(formData, 'whatsapp'),
+    email: str(formData, 'email'),
+    address: str(formData, 'address'),
+    googleMapsUrl: str(formData, 'googleMapsUrl'),
+    googleBusinessUrl: str(formData, 'googleBusinessUrl'),
+    emergencyContact: str(formData, 'emergencyContact'),
+    mapEmbed: str(formData, 'mapEmbed'),
+    facebook: str(formData, 'facebook'),
+    instagram: str(formData, 'instagram'),
+    youtube: str(formData, 'youtube'),
+    twitter: str(formData, 'twitter'),
+    linkedin: str(formData, 'linkedin'),
+    tiktok: str(formData, 'tiktok'),
+    pinterest: str(formData, 'pinterest'),
+    copyrightText: str(formData, 'copyrightText'),
+    footerText: str(formData, 'footerText'),
+    loadingAnimation: str(formData, 'loadingAnimation'),
+    
+    // JSON Fields
+    workingHours: jsonParse(formData, 'workingHours'),
+    themeColors: jsonParse(formData, 'themeColors'),
+    fonts: jsonParse(formData, 'fonts'),
+    buttonStyles: jsonParse(formData, 'buttonStyles'),
+    globalIcons: jsonParse(formData, 'globalIcons'),
+    websiteLoader: jsonParse(formData, 'websiteLoader'),
+    announcementBar: jsonParse(formData, 'announcementBar'),
+    cookieBanner: jsonParse(formData, 'cookieBanner'),
+    newsletterPopup: jsonParse(formData, 'newsletterPopup'),
+    headerMenu: jsonParse(formData, 'headerMenu'),
+    footerMenu: jsonParse(formData, 'footerMenu'),
+    
+    // Default SEO
+    metaTitle: str(formData, 'metaTitle'),
+    metaDesc: str(formData, 'metaDesc'),
+    keywords: str(formData, 'keywords'),
+    robots: str(formData, 'robots'),
+    sitemapEnabled: formData.get('sitemapEnabled') === 'on',
   };
 
   await prisma.siteSetting.upsert({
     where: { id: 'main' },
     update: data,
-    create: { id: 'main', ...data }
+    create: { id: 'main', ...data },
   });
-  revalidatePath('/');
-  revalidatePath('/admin/settings');
+
+  try {
+    await prisma.activityLog.create({
+      data: {
+        action: 'updated',
+        module: 'settings',
+        entityTitle: 'Global Website Settings',
+        userId: (session.user as { id?: string })?.id || undefined,
+      },
+    });
+  } catch { /* best-effort */ }
+
+  revalidatePath('/', 'layout');
 }

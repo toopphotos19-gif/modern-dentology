@@ -8,13 +8,15 @@ import { ImageBox } from '@/components/ui/ImagePlaceholder';
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const p = await prisma.blogPost.findUnique({ where: { slug: params.slug } });
+  const decodedSlug = decodeURIComponent(params.slug);
+  const p = await prisma.blogPost.findUnique({ where: { slug: decodedSlug } });
   return { title: p?.metaTitle || p?.title, description: p?.metaDesc || p?.excerpt };
 }
 
 export default async function BlogDetail({ params }: { params: { slug: string } }) {
+  const decodedSlug = decodeURIComponent(params.slug);
   const [post, settings] = await Promise.all([
-    prisma.blogPost.findUnique({ where: { slug: params.slug } }),
+    prisma.blogPost.findUnique({ where: { slug: decodedSlug } }),
     prisma.siteSetting.findUnique({ where: { id: 'main' } })
   ]);
   if (!post || !post.published) notFound();

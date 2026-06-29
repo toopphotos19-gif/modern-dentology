@@ -1,19 +1,22 @@
-import { CrudForm } from '@/components/admin/CrudForm';
-import { saveBlog } from '@/lib/adminActions';
+import { AdminPageHeader } from '@/components/admin/ui/AdminPageHeader';
+import { BlogForm } from '@/components/admin/BlogForm';
 
-const FIELDS = [
-  { name: 'title', label: 'Title' },
-  { name: 'slug', label: 'URL Slug (optional)' },
-  { name: 'excerpt', label: 'Excerpt' },
-  { name: 'content', label: 'Content', type: 'textarea' as const },
-  { name: 'featured', label: 'Featured Image', type: 'image' as const },
-  { name: 'category', label: 'Category' },
-  { name: 'author', label: 'Author' },
-  { name: 'metaTitle', label: 'SEO Meta Title' },
-  { name: 'metaDesc', label: 'SEO Meta Description' },
-  { name: 'published', label: 'Published', type: 'checkbox' as const }
-];
+export const dynamic = 'force-dynamic';
 
-export default function NewBlog() {
-  return (<div><h1 className="mb-6 text-2xl font-bold text-brand-900">Add Blog Post</h1><CrudForm fields={FIELDS} action={saveBlog} redirectTo="/admin/blog" /></div>);
+export default function NewBlogPage() {
+  return (
+    <div>
+      <AdminPageHeader
+        title="Create Post"
+        breadcrumbs={[
+          { label: 'Admin', href: '/admin' },
+          { label: 'Blog', href: '/admin/blog' },
+          { label: 'New' },
+        ]}
+      />
+      <div className="rounded-2xl bg-white dark:bg-slate-800 p-6 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700">
+        <BlogForm />
+      </div>
+    </div>
+  );
 }

@@ -1,17 +1,22 @@
-import { CrudForm } from '@/components/admin/CrudForm';
-import { saveTestimonial } from '@/lib/adminActions';
+import { AdminPageHeader } from '@/components/admin/ui/AdminPageHeader';
+import { TestimonialForm } from '@/components/admin/TestimonialForm';
 
-const FIELDS = [
-  { name: 'patientName', label: 'Patient Name' },
-  { name: 'review', label: 'Review', type: 'textarea' as const },
-  { name: 'rating', label: 'Rating (1-5)', type: 'number' as const },
-  { name: 'videoUrl', label: 'Video URL (optional)' },
-  { name: 'beforeImage', label: 'Before Image', type: 'image' as const },
-  { name: 'afterImage', label: 'After Image', type: 'image' as const },
-  { name: 'order', label: 'Display Order', type: 'number' as const },
-  { name: 'enabled', label: 'Enabled', type: 'checkbox' as const }
-];
+export const dynamic = 'force-dynamic';
 
-export default function NewTestimonial() {
-  return (<div><h1 className="mb-6 text-2xl font-bold text-brand-900">Add Testimonial</h1><CrudForm fields={FIELDS} action={saveTestimonial} redirectTo="/admin/testimonials" /></div>);
+export default function NewTestimonialPage() {
+  return (
+    <div>
+      <AdminPageHeader
+        title="New Testimonial"
+        breadcrumbs={[
+          { label: 'Admin', href: '/admin' },
+          { label: 'Testimonials', href: '/admin/testimonials' },
+          { label: 'New' },
+        ]}
+      />
+      <div className="rounded-2xl bg-white dark:bg-slate-800 p-6 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700">
+        <TestimonialForm />
+      </div>
+    </div>
+  );
 }

@@ -7,57 +7,240 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ──────────────────────────── AUTH ────────────────────────────
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String?
   password  String
   role      Role     @default(ADMIN)
+  avatar    String?
   createdAt DateTime @default(now())
+
+  activities ActivityLog[]
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+}
+
+// ──────────────────────────── SITE SETTINGS ────────────────────────────
+
+model SiteSetting {
+  id String @id @default("main")
+
+  // ── General ──
+  websiteName String?
+  tagline     String?
+  headerLogo  String?
+  footerLogo  String?
+  favicon     String?
+
+  // ── Hero Section ──
+  heroTitle    String?
+  heroSubtitle String?
+  heroDesc     String?
+  heroImage    String?
+  heroVideo    String?
+  heroBtn1Text String?
+  heroBtn1Link String?
+  heroBtn2Text String?
+  heroBtn2Link String?
+  stats        Json? // [{ label, value, icon }]
+  sectionOrder Json? // ["hero","stats","services",...]
+
+  // ── Contact ──
+  phone            String?
+  whatsapp         String?
+  email            String?
+  address          String?
+  googleMapsUrl    String?
+  googleBusinessUrl String?
+  workingHours     Json?   // [{ day, open, close, closed }]
+  emergencyContact String?
+  mapEmbed         String?
+
+  // ── Social Media ──
+  facebook  String?
+  instagram String?
+  youtube   String?
+  twitter   String?
+  linkedin  String?
+  tiktok    String?
+  pinterest String?
+
+  // ── Footer ──
+  copyrightText String?
+  footerText    String?
+  footerColumns Json? // [{ title, links:[{label,url}] }]
+
+  // ── Navigation Menus ──
+  headerMenu Json? // [{ label, url, children }]
+  footerMenu Json? // [{ label, url }]
+
+  // ── Appearance ──
+  themeColors  Json? // { primary, secondary, accent, bg, text }
+  fonts        Json? // { heading, body, googleFontsUrl }
+  buttonStyles Json? // { borderRadius, padding, style }
+  globalIcons  Json? // { iconLibrary, customIcons }
+
+  // ── Features / Popups ──
+  loadingAnimation String?
+  websiteLoader    Json? // { enabled, type, color }
+  announcementBar  Json? // { enabled, text, link, bgColor, textColor }
+  cookieBanner     Json? // { enabled, text, buttonText, position }
+  newsletterPopup  Json? // { enabled, title, desc, delay, image }
+
+  // ── About (legacy compat) ──
+  aboutImage String?
+  aboutText  String?
+
+  // ── Default SEO ──
+  metaTitle    String?
+  metaDesc     String?
+  keywords     String?
+  robots       String?
+  sitemapEnabled Boolean @default(true)
+
+  // ── Banners (legacy) ──
+  banners Json?
+
+  updatedAt DateTime @updatedAt
+}
+
+// ──────────────────────────── SERVICES ────────────────────────────
+
+model ServiceCategory {
+  id       String    @id @default(cuid())
+  name     String
+  slug     String    @unique
+  order    Int       @default(0)
+  enabled  Boolean   @default(true)
+  services Service[]
 }
 
 model Service {
-  id          String    @id @default(cuid())
-  slug        String    @unique
-  name        String
-  shortDesc   String
-  description String
+  id   String @id @default(cuid())
+  slug String @unique
+  name String
+
+  // ── Classification ──
+  categoryId String?
+  category   ServiceCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  featured   Boolean          @default(false)
+  enabled    Boolean          @default(true)
+  order      Int              @default(0)
+
+  // ── Content ──
+  shortDesc    String
+  description  String
+  introduction String?
+  benefits     Json? // [string]
+  procedure    Json? // [{ step, title, desc }]
+  recovery     String?
+  aftercare    String?
+  steps        Json? // legacy
+  faqs         Json? // [{ q, a }]
+
+  // ── Media ──
   image       String?
   banner      String?
-  benefits    Json?
-  steps       Json?
-  faqs        Json?
-  gallery     Json?
-  enabled     Boolean   @default(true)
-  order       Int       @default(0)
+  gallery     Json? // [{ url, caption, type }]
+  downloadPdf String?
+
+  // ── Relations (stored as JSON arrays of IDs for flexibility) ──
+  relatedTreatments Json? // [serviceId]
+  relatedBlogs      Json? // [blogId]
+  relatedDoctors    Json? // [doctorId]
+
+  // ── SEO ──
   metaTitle   String?
   metaDesc    String?
   keywords    String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  bookings    Booking[]
+  canonicalUrl String?
+  robotsMeta   String?
+  schemaMarkup Json?
+  ogTitle      String?
+  ogDesc       String?
+  ogImage      String?
+  twitterTitle String?
+  twitterDesc  String?
+  twitterImage String?
+  breadcrumb   String?
+  focusKeyword String?
+
+  // ── Features & Comparison ──
+  features        ServiceFeature[]
+  comparisonTable ComparisonTable?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  bookings  Booking[]
 }
+
+model ServiceFeature {
+  id          String  @id @default(cuid())
+  serviceId   String
+  service     Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  icon        String?
+  title       String
+  description String?
+  order       Int     @default(0)
+}
+
+model ComparisonTable {
+  id        String  @id @default(cuid())
+  serviceId String  @unique
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  columns   Json    // [{ key, label, enabled }]
+  rows      Json    // [{ feature, values: { colKey: value } }]
+  enabled   Boolean @default(true)
+}
+
+// ──────────────────────────── TECHNOLOGY ────────────────────────────
 
 model Technology {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  name        String
-  shortDesc   String
-  description String
-  image       String?
-  benefits    Json?
-  videos      Json?
-  enabled     Boolean  @default(true)
-  order       Int      @default(0)
-  metaTitle   String?
-  metaDesc    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String  @id @default(cuid())
+  slug         String  @unique
+  name         String
+  manufacturer String?
+  shortDesc    String
+  description  String
+  image        String?
+  benefits     Json? // [string]
+  features     Json? // [{ icon, title, desc }]
+  videos       Json? // [{ url, title }]
+  gallery      Json? // [{ url, caption }]
+  enabled      Boolean @default(true)
+  order        Int     @default(0)
+
+  // ── Relations ──
+  relatedTreatments Json? // [serviceId]
+  relatedDoctors    Json? // [doctorId]
+  comparisonTable   Json? // { columns, rows }
+
+  // ── SEO ──
+  metaTitle    String?
+  metaDesc     String?
+  keywords     String?
+  canonicalUrl String?
+  ogTitle      String?
+  ogDesc       String?
+  ogImage      String?
+  focusKeyword String?
+  schemaMarkup Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
+// ──────────────────────────── DOCTORS ────────────────────────────
+
 model Doctor {
-  id              String    @id @default(cuid())
-  slug            String    @unique
+  id              String  @id @default(cuid())
+  slug            String  @unique
   name            String
   qualification   String?
   experience      String?
@@ -66,60 +249,300 @@ model Doctor {
   certifications  Json?
   awards          Json?
   specializations Json?
-  enabled         Boolean   @default(true)
-  order           Int       @default(0)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  bookings        Booking[]
+  enabled         Boolean @default(true)
+  order           Int     @default(0)
+
+  // ── SEO ──
+  metaTitle    String?
+  metaDesc     String?
+  keywords     String?
+  canonicalUrl String?
+  ogTitle      String?
+  ogDesc       String?
+  ogImage      String?
+  focusKeyword String?
+  schemaMarkup Json?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  bookings  Booking[]
 }
 
+// ──────────────────────────── TESTIMONIALS ────────────────────────────
+
 model Testimonial {
+  id              String  @id @default(cuid())
+  slug            String? @unique
+  patientName     String
+  patientImage    String?
+  patientLocation String?
+  treatment       String?
+  rating          Int     @default(5)
+  review          String
+  videoUrl        String?
+  videoReview     String?
+  beforeImage     String?
+  afterImage      String?
+  gallery         Json?   // [{ url, caption }]
+  featured        Boolean @default(false)
+  enabled         Boolean @default(true)
+  order           Int     @default(0)
+
+  // ── SEO ──
+  seoTitle     String?
+  seoDesc      String?
+  seoKeywords  String?
+  canonicalUrl String?
+  ogTitle      String?
+  ogDesc       String?
+  ogImage      String?
+  focusKeyword String?
+
+  createdAt DateTime @default(now())
+}
+
+// ──────────────────────────── BLOG ────────────────────────────
+
+model BlogPost {
+  id       String  @id @default(cuid())
+  slug     String  @unique
+  title    String
+  excerpt  String?
+  content  String
+  featured String?
+
+  // ── Classification ──
+  category  String?
+  author    String?
+  tags      Json?     // [string]
+  published Boolean   @default(false)
+  publishAt DateTime?
+
+  // ── Rich Content ──
+  gallery     Json? // [{ url, caption }]
+  videoEmbeds Json? // [{ url, title, platform }]
+  readingTime Int?  // minutes
+
+  // ── Relations ──
+  relatedBlogs    Json? // [blogId]
+  relatedServices Json? // [serviceId]
+  relatedDoctors  Json? // [doctorId]
+
+  // ── SEO ──
+  metaTitle    String?
+  metaDesc     String?
+  keywords     String?
+  canonicalUrl String?
+  ogTitle      String?
+  ogDesc       String?
+  ogImage      String?
+  twitterTitle String?
+  twitterDesc  String?
+  twitterImage String?
+  focusKeyword String?
+  schemaMarkup Json?
+  breadcrumb   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ──────────────────────────── BEFORE & AFTER ────────────────────────────
+
+model BeforeAfterCategory {
+  id      String  @id @default(cuid())
+  name    String
+  slug    String  @unique
+  order   Int     @default(0)
+  enabled Boolean @default(true)
+
+  comparisons BeforeAfter[]
+}
+
+model BeforeAfter {
+  id String @id @default(cuid())
+
+  // ── General ──
+  slug           String               @unique
+  patientName    String?
+  patientInitials String?
+  treatmentName  String
+  categoryId     String?
+  category       BeforeAfterCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  doctorName     String?
+  treatmentDate  DateTime?
+  status         ContentStatus        @default(DRAFT)
+  featured       Boolean              @default(false)
+  order          Int                  @default(0)
+
+  // ── Images ──
+  beforeImage        String
+  afterImage         String
+  beforeImageAlt     String?
+  afterImageAlt      String?
+  beforeImageCaption String?
+  afterImageCaption  String?
+
+  // ── Content ──
+  shortDescription  String?
+  patientStory      String?
+  treatmentSummary  String?
+  procedurePerformed String?
+
+  // ── SEO ──
+  seoTitle     String?
+  seoDesc      String?
+  seoKeywords  String?
+  seoSlug      String?
+  ogImage      String?
+  focusKeyword String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+}
+
+// ──────────────────────────── GALLERY ────────────────────────────
+
+model GalleryImage {
   id          String   @id @default(cuid())
-  patientName String
-  review      String
-  rating      Int      @default(5)
-  videoUrl    String?
-  beforeImage String?
-  afterImage  String?
-  enabled     Boolean  @default(true)
+  url         String
+  caption     String?
+  altText     String?
+  seoTitle    String?
+  description String?
+  album       String?
+  folder      String?
+  mediaType   String?  @default("image")
+  width       Int?
+  height      Int?
+  fileSize    Int?
   order       Int      @default(0)
   createdAt   DateTime @default(now())
 }
 
-model BlogPost {
-  id        String    @id @default(cuid())
-  slug      String    @unique
-  title     String
-  excerpt   String?
-  content   String
-  featured  String?
-  category  String?
-  author    String?
-  published Boolean   @default(false)
-  publishAt DateTime?
-  metaTitle String?
-  metaDesc  String?
-  keywords  String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+// ──────────────────────────── MEDIA LIBRARY ────────────────────────────
+
+model MediaFile {
+  id          String   @id @default(cuid())
+  url         String
+  publicId    String?  // Cloudinary public ID
+  filename    String
+  mimeType    String
+  fileSize    Int      @default(0)
+  width       Int?
+  height      Int?
+  folder      String   @default("/")
+  altText     String?
+  title       String?
+  caption     String?
+  description String?
+  tags        Json?    // [string]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
-model GalleryImage {
-  id        String   @id @default(cuid())
-  url       String
-  caption   String?
-  album     String?
-  order     Int      @default(0)
+// ──────────────────────────── PAGES ────────────────────────────
+
+model Page {
+  id       String  @id @default(cuid())
+  slug     String  @unique
+  title    String
+  enabled  Boolean @default(true)
+
+  // ── SEO ──
+  metaTitle    String?
+  metaDesc     String?
+  keywords     String?
+  ogTitle      String?
+  ogDesc       String?
+  ogImage      String?
+  focusKeyword String?
+
+  sections PageSection[]
+
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
+
+model PageSection {
+  id     String @id @default(cuid())
+  pageId String
+  page   Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  sectionType String  // "hero", "content", "gallery", "cta", "features", etc.
+  heading     String?
+  subHeading  String?
+  description String?
+  content     Json?   // Flexible content store
+  images      Json?   // [{ url, alt, caption }]
+  videos      Json?   // [{ url, title }]
+  icons       Json?   // [{ name, color }]
+  buttons     Json?   // [{ text, link, style }]
+  bgImage     String?
+  bgColor     String?
+  layout      String? // "full", "split", "grid", etc.
+  enabled     Boolean @default(true)
+  order       Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ──────────────────────────── ABOUT PAGE ────────────────────────────
+
+model AboutPage {
+  id String @id @default("main")
+
+  // ── Images ──
+  bannerImage String?
+  aboutImage  String?
+  ownerImage  String?
+  clinicImages Json? // [{ url, caption }]
+
+  // ── Content ──
+  mission       String?
+  vision        String?
+  history       String?
+  timeline      Json?   // [{ year, title, desc, image }]
+  statistics    Json?   // [{ label, value, icon }]
+  awards        Json?   // [{ title, year, image, desc }]
+  certificates  Json?   // [{ title, image, desc }]
+  whyChooseUs   Json?   // [{ icon, title, desc }]
+  ctaTitle      String?
+  ctaDescription String?
+  ctaButtonText  String?
+  ctaButtonLink  String?
+  ctaImage       String?
+
+  // ── SEO ──
+  metaTitle    String?
+  metaDesc     String?
+  keywords     String?
+  ogTitle      String?
+  ogDesc       String?
+  ogImage      String?
+  focusKeyword String?
+
+  updatedAt DateTime @updatedAt
+}
+
+// ──────────────────────────── FAQ ────────────────────────────
 
 model Faq {
   id       String  @id @default(cuid())
   question String
   answer   String
+  category String?
   order    Int     @default(0)
   enabled  Boolean @default(true)
 }
+
+// ──────────────────────────── BOOKINGS ────────────────────────────
 
 model Booking {
   id        String        @id @default(cuid())
@@ -136,6 +559,15 @@ model Booking {
   doctor    Doctor?       @relation(fields: [doctorId], references: [id])
   service   Service?      @relation(fields: [serviceId], references: [id])
 }
+
+enum BookingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  RESCHEDULED
+}
+
+// ──────────────────────────── CAREERS ────────────────────────────
 
 model Job {
   id           String        @id @default(cuid())
@@ -164,35 +596,15 @@ model Application {
   job           Job?              @relation(fields: [jobId], references: [id])
 }
 
-model SiteSetting {
-  id           String   @id @default("main")
-  heroTitle    String?
-  heroSubtitle String?
-  heroDesc     String?
-  heroImage    String?
-  heroVideo    String?
-  heroBtn1Text String?
-  heroBtn1Link String?
-  heroBtn2Text String?
-  heroBtn2Link String?
-  stats        Json?
-  sectionOrder Json?
-  banners      Json?
-  phone        String?
-  email        String?
-  address      String?
-  mapEmbed     String?
-  facebook     String?
-  instagram    String?
-  youtube      String?
-  whatsapp     String?
-  metaTitle    String?
-  metaDesc     String?
-  keywords     String?
-  updatedAt    DateTime @updatedAt
-  aboutImage   String?
-  aboutText    String?
+enum ApplicationStatus {
+  NEW
+  SHORTLISTED
+  INTERVIEW
+  REJECTED
+  HIRED
 }
+
+// ──────────────────────────── LEADS / CRM ────────────────────────────
 
 model Lead {
   id        String     @id @default(cuid())
@@ -207,26 +619,6 @@ model Lead {
   createdAt DateTime   @default(now())
 }
 
-enum Role {
-  ADMIN
-  EDITOR
-}
-
-enum BookingStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  RESCHEDULED
-}
-
-enum ApplicationStatus {
-  NEW
-  SHORTLISTED
-  INTERVIEW
-  REJECTED
-  HIRED
-}
-
 enum LeadStatus {
   NEW
   CONTACTED
@@ -234,4 +626,54 @@ enum LeadStatus {
   CONSULTATION_BOOKED
   CONVERTED
   LOST
+}
+
+// ──────────────────────────── NAVIGATION ────────────────────────────
+
+model MenuItem {
+  id       String  @id @default(cuid())
+  menu     String  // "header" or "footer"
+  label    String
+  url      String
+  parentId String?
+  order    Int     @default(0)
+  enabled  Boolean @default(true)
+  target   String? @default("_self")
+  icon     String?
+}
+
+// ──────────────────────────── ACTIVITY LOG ────────────────────────────
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String   // "created", "updated", "deleted"
+  module    String   // "service", "blog", "settings", etc.
+  entityId  String?
+  entityTitle String?
+  details   String?
+  createdAt DateTime @default(now())
+}
+
+// ──────────────────────────── NOTIFICATIONS ────────────────────────────
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  type      String   @default("info") // "info", "success", "warning", "error"
+  read      Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+}
+
+// ──────────────────────────── NEWSLETTER ────────────────────────────
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
 }

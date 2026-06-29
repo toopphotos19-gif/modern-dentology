@@ -9,14 +9,16 @@ import { Check } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const s = await prisma.service.findUnique({ where: { slug: params.slug } });
+export async function generateMetadata({ params }: { params: { slug: string[] } }): Promise<Metadata> {
+  const decodedSlug = decodeURIComponent(params.slug.join('/'));
+  const s = await prisma.service.findUnique({ where: { slug: decodedSlug } });
   return { title: s?.metaTitle || s?.name, description: s?.metaDesc || s?.shortDesc };
 }
 
-export default async function ServiceDetail({ params }: { params: { slug: string } }) {
+export default async function ServiceDetail({ params }: { params: { slug: string[] } }) {
+  const decodedSlug = decodeURIComponent(params.slug.join('/'));
   const [service, settings, related] = await Promise.all([
-    prisma.service.findUnique({ where: { slug: params.slug } }),
+    prisma.service.findUnique({ where: { slug: decodedSlug } }),
     prisma.siteSetting.findUnique({ where: { id: 'main' } }),
     prisma.service.findMany({ where: { enabled: true }, orderBy: { order: 'asc' }, take: 3 })
   ]);

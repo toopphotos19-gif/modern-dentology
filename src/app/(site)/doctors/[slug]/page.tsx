@@ -8,8 +8,9 @@ import { ImageBox } from '@/components/ui/ImagePlaceholder';
 export const dynamic = 'force-dynamic';
 
 export default async function DoctorDetail({ params }: { params: { slug: string } }) {
+  const decodedSlug = decodeURIComponent(params.slug);
   const [doctor, settings] = await Promise.all([
-    prisma.doctor.findUnique({ where: { slug: params.slug } }),
+    prisma.doctor.findUnique({ where: { slug: decodedSlug } }),
     prisma.siteSetting.findUnique({ where: { id: 'main' } })
   ]);
   if (!doctor || !doctor.enabled) notFound();
