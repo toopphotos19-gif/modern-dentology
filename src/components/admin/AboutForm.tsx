@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { UploadField } from '@/components/admin/UploadField';
-import { saveAboutSettings } from '@/app/admin/(dashboard)/about/actions';
+import { saveAboutPage } from '@/app/admin/(dashboard)/about/actions';
 
 export function AboutForm({ settings }: { settings: any }) {
   const [aboutImage, setAboutImage] = useState((settings?.aboutImage as string) || '');
@@ -12,7 +12,7 @@ export function AboutForm({ settings }: { settings: any }) {
     <form
       action={async (fd) => {
         fd.set('aboutImage', aboutImage);
-        await saveAboutSettings(fd);
+        await saveAboutPage(fd);
         setSaved(true);
       }}
       className="max-w-2xl space-y-5 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100"

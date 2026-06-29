@@ -106,7 +106,8 @@ export function TestimonialForm({ testimonial }: { testimonial?: any }) {
               <div className="space-y-5 max-w-3xl">
                 <AdminTextarea name="review" label="Written Review" defaultValue={testimonial?.review} rows={6} required />
                 <AdminInput name="videoUrl" label="Video Review URL (YouTube/Vimeo)" defaultValue={testimonial?.videoUrl} />
-                <UploadField label="Direct Video Upload (Optional)" value={testimonial?.videoReview || ''} onChange={() => {}} accept="video/*" helpText="Upload a short video file if not using a URL." />
+                <UploadField label="Direct Video Upload (Optional)" value={testimonial?.videoReview || ''} onChange={() => {}} accept="video/*" />
+                <p className="text-xs text-slate-500 mt-1">Upload a short video file if not using a URL.</p>
                 <input type="hidden" name="videoReview" value={testimonial?.videoReview || ''} />
               </div>
             ),

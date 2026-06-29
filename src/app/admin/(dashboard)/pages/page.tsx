@@ -51,7 +51,7 @@ export default async function PagesPage() {
                 </td>
                 <td className="px-6 py-4 text-slate-500 dark:text-slate-400">/{p.slug}</td>
                 <td className="px-6 py-4 text-slate-500 dark:text-slate-400">
-                  <AdminBadge variant="secondary">{p._count.sections} Sections</AdminBadge>
+                  <AdminBadge variant="default">{p._count.sections} Sections</AdminBadge>
                 </td>
                 <td className="px-6 py-4">
                   <AdminBadge variant={p.enabled ? 'success' : 'default'} dot>

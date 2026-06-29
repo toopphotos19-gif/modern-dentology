@@ -69,7 +69,6 @@ export function BeforeAfterForm({
                     name="categoryId"
                     label="Category"
                     defaultValue={comparison?.categoryId || ''}
-                    placeholder="Select category"
                     options={categories.map((c) => ({ value: c.id, label: c.name }))}
                   />
                   <AdminSelect

@@ -6,20 +6,16 @@ import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Container } from '@/components/ui/Container';
-import { SITE } from '@/lib/site';
 
-const NAV = [
-  { label: 'Home', href: '/' },
-  { label: 'Services', href: '/services' },
-  { label: 'Doctors', href: '/doctors' },
-  { label: 'Technology', href: '/technology' },
-  { label: 'Blog', href: '/blog' },
-  { label: 'Gallery', href: '/gallery' },
-  { label: 'About', href: '/about' },
-  { label: 'Contact', href: '/contact' }
-];
-
-export function Header() {
+export function Header({
+  logo,
+  siteName = 'Premium Dental',
+  nav = []
+}: {
+  logo?: string | null;
+  siteName?: string | null;
+  nav?: { label: string; href: string }[];
+}) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
@@ -43,12 +39,23 @@ export function Header() {
     >
       <Container className="flex h-20 items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-500 font-bold text-white">M</span>
-          <span className={`text-xl font-bold ${forceSolid ? 'text-brand-900' : 'text-white'}`}>{SITE.name}</span>
+          {logo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logo} alt={siteName || 'Logo'} className="h-10 object-contain" />
+          ) : (
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-500 font-bold text-white">
+              {siteName?.charAt(0) || 'D'}
+            </span>
+          )}
+          {!logo && (
+            <span className={`text-xl font-bold ${forceSolid ? 'text-brand-900' : 'text-white'}`}>
+              {siteName}
+            </span>
+          )}
         </Link>
 
         <nav className="hidden items-center gap-7 lg:flex">
-          {NAV.map((item) => (
+          {nav.map((item) => (
             <Link key={item.href} href={item.href} className={`text-sm font-medium transition-colors hover:text-brand-500 ${forceSolid ? 'text-slate-700' : 'text-white/90'}`}>
               {item.label}
             </Link>
@@ -65,7 +72,7 @@ export function Header() {
 
       {open && (
         <div className="bg-white px-4 pb-4 shadow-lg lg:hidden">
-          {NAV.map((item) => (
+          {nav.map((item) => (
             <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="block border-b py-3 text-slate-700">
               {item.label}
             </Link>

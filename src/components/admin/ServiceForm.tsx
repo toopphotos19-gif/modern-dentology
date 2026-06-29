@@ -115,7 +115,6 @@ export function ServiceForm({
                     name="categoryId"
                     label="Category"
                     defaultValue={service?.categoryId || ''}
-                    placeholder="Select category"
                     options={categories.map((c) => ({ value: c.id, label: c.name }))}
                   />
                   <AdminInput name="order" label="Sort Order" type="number" defaultValue={String(service?.order ?? 0)} />

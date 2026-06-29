@@ -8,9 +8,10 @@ type Props = {
   helpText?: string;
   options: { value: string; label: string }[];
   icon?: React.ReactNode;
+  placeholder?: string;
 } & React.SelectHTMLAttributes<HTMLSelectElement>;
 
-export function AdminSelect({ label, error, helpText, options, icon, className, ...props }: Props) {
+export function AdminSelect({ label, error, helpText, options, icon, className, placeholder, ...props }: Props) {
   return (
     <div className="space-y-1.5">
       {label && (
@@ -37,7 +38,7 @@ export function AdminSelect({ label, error, helpText, options, icon, className, 
             className
           )}
         >
-          {props.placeholder && <option value="">{props.placeholder}</option>}
+          {placeholder && <option value="">{placeholder}</option>}
           {options.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}

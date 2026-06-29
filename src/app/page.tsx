@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
+import { SiteHeader } from '@/components/layout/SiteHeader';
+import { SiteFooter } from '@/components/layout/SiteFooter';
 import { Hero } from '@/components/home/Hero';
 import { Stats } from '@/components/home/Stats';
 import { CardGrid } from '@/components/home/CardGrid';
@@ -8,8 +8,6 @@ import { Testimonials } from '@/components/home/Testimonials';
 
 export const dynamic = 'force-dynamic';
 
-// The homepage reads everything from the database so the admin can change it.
-// Images are blank placeholders until added from the admin panel.
 export default async function Home() {
   const [settings, services, doctors, technologies, testimonials] =
     await Promise.all([
@@ -17,14 +15,14 @@ export default async function Home() {
       prisma.service.findMany({ where: { enabled: true }, orderBy: { order: 'asc' }, take: 6 }),
       prisma.doctor.findMany({ where: { enabled: true }, orderBy: { order: 'asc' }, take: 3 }),
       prisma.technology.findMany({ where: { enabled: true }, orderBy: { order: 'asc' }, take: 6 }),
-      prisma.testimonial.findMany({ where: { enabled: true }, orderBy: { order: 'asc' }, take: 3 })
+      prisma.testimonial.findMany({ where: { enabled: true, featured: true }, orderBy: { order: 'asc' }, take: 3 })
     ]);
 
   const stats = (settings?.stats as { label: string; value: string }[]) || [];
 
   return (
     <>
-      <Header />
+      <SiteHeader />
       <main>
         <Hero
           title={settings?.heroTitle}
@@ -43,7 +41,7 @@ export default async function Home() {
         <CardGrid eyebrow="Technology" heading="Advanced Dental Technology" cta="Explore" cards={technologies.map((t) => ({ title: t.name, desc: t.shortDesc, image: t.image, href: `/technology/${t.slug}` }))} />
         <CardGrid eyebrow="Our Team" heading="Meet Our Expert Doctors" cta="View Profile" cards={doctors.map((d) => ({ title: d.name, desc: d.qualification || '', image: d.photo, href: `/doctors/${d.slug}` }))} />
       </main>
-      <Footer phone={settings?.phone} email={settings?.email} address={settings?.address} />
+      <SiteFooter />
     </>
   );
 }
