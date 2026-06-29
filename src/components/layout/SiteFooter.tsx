@@ -26,6 +26,7 @@ export async function SiteFooter() {
         { label: "Technology", href: "/technology" },
         { label: "Testimonials", href: "/testimonials" },
         { label: "FAQ", href: "/faq" },
+        { label: "Before & After", href: "/before-after" },
         { label: "Gallery", href: "/gallery" }
       ]
     }

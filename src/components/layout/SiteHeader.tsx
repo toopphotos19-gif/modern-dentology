@@ -15,6 +15,7 @@ export async function SiteHeader() {
         { label: 'Doctors', href: '/doctors' },
         { label: 'Technology', href: '/technology' },
         { label: 'Blog', href: '/blog' },
+        { label: 'Before & After', href: '/before-after' },
         { label: 'Gallery', href: '/gallery' },
         { label: 'About', href: '/about' },
         { label: 'Contact', href: '/contact' }
