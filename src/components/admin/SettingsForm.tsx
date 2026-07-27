@@ -124,7 +124,7 @@ export function SettingsForm({ settings }: { settings: any }) {
             icon: <LayoutTemplate className="h-4 w-4" />,
             content: (
               <div className="space-y-5 max-w-3xl">
-                <AdminTextarea name="headerMenu" label="Header Menu (JSON)" defaultValue={JSON.stringify(settings?.headerMenu || [])} rows={6} helpText='[{"label":"Home","url":"/"}]' />
+                <AdminTextarea name="headerMenu" label="Header Menu (JSON)" defaultValue={JSON.stringify(settings?.headerMenu || [])} rows={6} helpText='[{"label":"Home","href":"/"}]' />
                 <AdminTextarea name="footerMenu" label="Footer Menu (JSON)" defaultValue={JSON.stringify(settings?.footerMenu || [])} rows={6} helpText='[{"label":"Privacy Policy","url":"/privacy"}]' />
               </div>
             ),
