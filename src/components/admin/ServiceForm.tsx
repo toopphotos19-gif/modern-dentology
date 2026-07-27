@@ -16,9 +16,12 @@ import { MultiImageUpload, type GalleryItem } from '@/components/admin/MultiImag
 import { RichTextEditor } from '@/components/admin/RichTextEditor';
 import { saveService } from '@/app/admin/(dashboard)/services/actions';
 import { showToast } from '@/components/admin/ui/AdminToast';
+import { FileText, Settings, Layers, Columns, Images, Link2, Search as SearchIcon, Download } from 'lucide-react';
 import {
-  FileText, Settings, Layers, Columns, Images, Link2, Search as SearchIcon, Download
-} from 'lucide-react';
+  ProcedureStepsBuilder, type ProcedureStep,
+  FaqBuilder, type FaqItem,
+  RelationPicker, type RelationItem,
+} from '@/components/admin/ServiceBuilders';
 
 type Category = { id: string; name: string };
 type ServiceData = Record<string, any>;
@@ -26,9 +29,15 @@ type ServiceData = Record<string, any>;
 export function ServiceForm({
   service,
   categories = [],
+  allServices = [],
+  allBlogs = [],
+  allDoctors = [],
 }: {
   service?: ServiceData;
   categories?: Category[];
+  allServices?: RelationItem[];
+  allBlogs?: RelationItem[];
+  allDoctors?: RelationItem[];
 }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
@@ -47,6 +56,21 @@ export function ServiceForm({
   const [gallery, setGallery] = useState<GalleryItem[]>((service?.gallery as GalleryItem[]) || []);
   const [comparison, setComparison] = useState<ComparisonData>(
     (service?.comparisonTable as ComparisonData) || { columns: [], rows: [], enabled: false }
+  );
+  const [procedureSteps, setProcedureSteps] = useState<ProcedureStep[]>(
+    (service?.procedure as ProcedureStep[]) || []
+  );
+  const [faqs, setFaqs] = useState<FaqItem[]>(
+    (service?.faqs as FaqItem[]) || []
+  );
+  const [relatedTreatments, setRelatedTreatments] = useState<string[]>(
+    (service?.relatedTreatments as string[]) || []
+  );
+  const [relatedBlogs, setRelatedBlogs] = useState<string[]>(
+    (service?.relatedBlogs as string[]) || []
+  );
+  const [relatedDoctors, setRelatedDoctors] = useState<string[]>(
+    (service?.relatedDoctors as string[]) || []
   );
   const [seo, setSeo] = useState<SeoData>({
     metaTitle: service?.metaTitle || '',
@@ -81,6 +105,11 @@ export function ServiceForm({
       fd.set('features', JSON.stringify(features));
       fd.set('gallery', JSON.stringify(gallery));
       fd.set('comparisonTable', JSON.stringify(comparison));
+      fd.set('procedure', JSON.stringify(procedureSteps));
+      fd.set('faqs', JSON.stringify(faqs));
+      fd.set('relatedTreatments', JSON.stringify(relatedTreatments));
+      fd.set('relatedBlogs', JSON.stringify(relatedBlogs));
+      fd.set('relatedDoctors', JSON.stringify(relatedDoctors));
       // SEO fields
       Object.entries(seo).forEach(([k, v]) => fd.set(k, v || ''));
 
@@ -138,10 +167,10 @@ export function ServiceForm({
                 <RichTextEditor label="Full Description" content={description} onChange={setDescription} />
                 <RichTextEditor label="Introduction" content={introduction} onChange={setIntroduction} placeholder="Treatment introduction..." />
                 <AdminTextarea name="benefits" label="Benefits (one per line)" defaultValue={Array.isArray(service?.benefits) ? (service.benefits as string[]).join('\n') : ''} rows={5} helpText="Each line becomes a bullet point" />
-                <AdminTextarea name="procedure" label="Procedure Steps (JSON)" defaultValue={JSON.stringify(service?.procedure || [], null, 2)} rows={5} helpText="[{ step, title, desc }]" />
+                <ProcedureStepsBuilder steps={procedureSteps} onChange={setProcedureSteps} />
                 <RichTextEditor label="Recovery" content={recovery} onChange={setRecovery} placeholder="Recovery information..." />
                 <RichTextEditor label="Aftercare" content={aftercare} onChange={setAftercare} placeholder="Aftercare instructions..." />
-                <AdminTextarea name="faqs" label="FAQs (JSON)" defaultValue={JSON.stringify(service?.faqs || [], null, 2)} rows={5} helpText='[{ "q": "Question", "a": "Answer" }]' />
+                <FaqBuilder faqs={faqs} onChange={setFaqs} />
               </div>
             ),
           },
@@ -182,10 +211,31 @@ export function ServiceForm({
             label: 'Relations',
             icon: <Link2 className="h-4 w-4" />,
             content: (
-              <div className="space-y-4 max-w-3xl">
-                <AdminTextarea name="relatedTreatments" label="Related Treatment IDs (JSON)" defaultValue={JSON.stringify(service?.relatedTreatments || [])} rows={3} helpText="Array of service IDs" />
-                <AdminTextarea name="relatedBlogs" label="Related Blog IDs (JSON)" defaultValue={JSON.stringify(service?.relatedBlogs || [])} rows={3} />
-                <AdminTextarea name="relatedDoctors" label="Related Doctor IDs (JSON)" defaultValue={JSON.stringify(service?.relatedDoctors || [])} rows={3} />
+              <div className="space-y-5 max-w-3xl">
+                <RelationPicker
+                  label="Related Treatments"
+                  description="Select other services that are related to this treatment"
+                  items={allServices.filter((s) => s.id !== service?.id)}
+                  selectedIds={relatedTreatments}
+                  onChange={setRelatedTreatments}
+                  emptyMessage="No other services created yet"
+                />
+                <RelationPicker
+                  label="Related Blog Posts"
+                  description="Select blog posts relevant to this service"
+                  items={allBlogs}
+                  selectedIds={relatedBlogs}
+                  onChange={setRelatedBlogs}
+                  emptyMessage="No blog posts created yet"
+                />
+                <RelationPicker
+                  label="Related Doctors"
+                  description="Select doctors who perform this treatment"
+                  items={allDoctors}
+                  selectedIds={relatedDoctors}
+                  onChange={setRelatedDoctors}
+                  emptyMessage="No doctors added yet"
+                />
               </div>
             ),
           },
