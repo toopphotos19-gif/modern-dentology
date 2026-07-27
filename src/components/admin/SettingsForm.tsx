@@ -10,6 +10,7 @@ import { UploadField } from '@/components/admin/UploadField';
 import { showToast } from '@/components/admin/ui/AdminToast';
 import { saveSiteSettings } from '@/app/admin/(dashboard)/settings/actions';
 import { Globe, MapPin, Share2, Paintbrush, Bell, LayoutTemplate, Search } from 'lucide-react';
+import { AppearanceSettings } from '@/components/admin/AppearanceSettings';
 
 export function SettingsForm({ settings }: { settings: any }) {
   const [saving, setSaving] = useState(false);
@@ -108,15 +109,7 @@ export function SettingsForm({ settings }: { settings: any }) {
             value: 'appearance',
             label: 'Appearance',
             icon: <Paintbrush className="h-4 w-4" />,
-            content: (
-              <div className="space-y-5 max-w-3xl">
-                <AdminTextarea name="themeColors" label="Theme Colors (JSON)" defaultValue={JSON.stringify(settings?.themeColors || {})} rows={4} helpText='{"primary":"#0ea5e9", "secondary":"#64748b"}' />
-                <AdminTextarea name="fonts" label="Typography (JSON)" defaultValue={JSON.stringify(settings?.fonts || {})} rows={4} helpText='{"heading":"Inter", "body":"Roboto"}' />
-                <AdminTextarea name="buttonStyles" label="Button Styles (JSON)" defaultValue={JSON.stringify(settings?.buttonStyles || {})} rows={3} />
-                <AdminTextarea name="globalIcons" label="Global Icons (JSON)" defaultValue={JSON.stringify(settings?.globalIcons || {})} rows={3} />
-                <AdminTextarea name="websiteLoader" label="Website Loader (JSON)" defaultValue={JSON.stringify(settings?.websiteLoader || {})} rows={3} />
-              </div>
-            ),
+            content: <AppearanceSettings settings={settings} />,
           },
           {
             value: 'navigation',
