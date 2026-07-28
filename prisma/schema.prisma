@@ -10,20 +10,47 @@ datasource db {
 // ──────────────────────────── AUTH ────────────────────────────
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
+  id        String    @id @default(cuid())
+  email     String    @unique
   name      String?
   password  String
-  role      Role     @default(ADMIN)
+  role      Role      @default(STAFF)
   avatar    String?
-  createdAt DateTime @default(now())
+  enabled   Boolean   @default(true)
+  menuId    String?
+  menu      AdminMenu? @relation(fields: [menuId], references: [id], onDelete: SetNull)
+  createdAt DateTime  @default(now())
 
   activities ActivityLog[]
 }
 
 enum Role {
+  SUPER_ADMIN
   ADMIN
-  EDITOR
+  STAFF
+}
+
+// ──────────────────────────── ACCESS CONTROL ────────────────────────────
+
+model AdminMenu {
+  id          String          @id @default(cuid())
+  name        String          @unique
+  description String?
+  items       AdminMenuItem[]
+  users       User[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model AdminMenuItem {
+  id       String    @id @default(cuid())
+  menuId   String
+  menu     AdminMenu @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  label    String
+  href     String
+  icon     String?
+  order    Int       @default(0)
+  group    String    @default("Content")
 }
 
 // ──────────────────────────── SITE SETTINGS ────────────────────────────

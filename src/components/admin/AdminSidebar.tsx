@@ -7,9 +7,17 @@ import {
   LayoutDashboard, Stethoscope, Cpu, Users, Star, FileText,
   Images, HelpCircle, Calendar, Briefcase, MessageSquare, Settings,
   LogOut, Menu, X, ChevronDown, Search, Layers, SplitSquareVertical,
-  FolderOpen, FileImage, Bell, Newspaper, Info
+  FolderOpen, FileImage, Bell, Newspaper, Info, Shield, LayoutGrid
 } from 'lucide-react';
 import { clsx } from 'clsx';
+
+// Icon name → component mapping
+const ICON_MAP: Record<string, React.ElementType> = {
+  LayoutDashboard, Stethoscope, Cpu, Users, Star, FileText,
+  Images, HelpCircle, Calendar, Briefcase, MessageSquare, Settings,
+  Layers, SplitSquareVertical, FolderOpen, FileImage, Bell, Newspaper,
+  Info, Shield, LayoutGrid,
+};
 
 type NavItem = {
   label: string;
@@ -22,7 +30,8 @@ type NavGroup = {
   items: NavItem[];
 };
 
-const NAV_GROUPS: NavGroup[] = [
+// Full default navigation (used by SUPER_ADMIN)
+const ALL_NAV_GROUPS: NavGroup[] = [
   {
     title: 'Overview',
     items: [
@@ -70,9 +79,28 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Website Settings', href: '/admin/settings', icon: Settings },
     ],
   },
+  {
+    title: 'Access Control',
+    items: [
+      { label: 'Users', href: '/admin/users', icon: Users },
+      { label: 'Menus', href: '/admin/menus', icon: LayoutGrid },
+    ],
+  },
 ];
 
-export function AdminSidebar() {
+type AllowedItem = { label: string; href: string; icon: string | null; group: string };
+
+export function AdminSidebar({
+  userRole,
+  userName,
+  userEmail,
+  menuItems,
+}: {
+  userRole: string;
+  userName?: string | null;
+  userEmail?: string | null;
+  menuItems?: AllowedItem[];
+}) {
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const pathname = usePathname();
@@ -94,6 +122,32 @@ export function AdminSidebar() {
     if (href === '/admin') return pathname === '/admin';
     return pathname.startsWith(href);
   }
+
+  // Build navigation based on role
+  let navGroups: NavGroup[];
+
+  if (userRole === 'SUPER_ADMIN') {
+    // Super admins see everything
+    navGroups = ALL_NAV_GROUPS;
+  } else if (menuItems && menuItems.length > 0) {
+    // Build from assigned menu items
+    const groupMap: Record<string, NavItem[]> = {};
+    menuItems.forEach((item) => {
+      const groupName = item.group || 'Other';
+      if (!groupMap[groupName]) groupMap[groupName] = [];
+      const IconComp = ICON_MAP[item.icon || ''] || LayoutDashboard;
+      groupMap[groupName].push({ label: item.label, href: item.href, icon: IconComp });
+    });
+    navGroups = Object.entries(groupMap).map(([title, items]) => ({ title, items }));
+  } else {
+    // No menu assigned — show only dashboard
+    navGroups = [{
+      title: 'Overview',
+      items: [{ label: 'Dashboard', href: '/admin', icon: LayoutDashboard }],
+    }];
+  }
+
+  const initials = (userName || userEmail || 'U').charAt(0).toUpperCase();
 
   return (
     <>
@@ -135,7 +189,6 @@ export function AdminSidebar() {
         <div className="px-4 py-3">
           <button
             onClick={() => {
-              // Trigger Cmd+K search
               document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }));
             }}
             className="flex w-full items-center gap-2 rounded-xl bg-white/5 px-3 py-2.5 text-sm text-slate-400 hover:bg-white/10 transition-colors group"
@@ -150,7 +203,7 @@ export function AdminSidebar() {
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 pb-4 admin-scrollbar">
-          {NAV_GROUPS.map((group) => (
+          {navGroups.map((group) => (
             <div key={group.title} className="mb-1">
               {/* Group Header */}
               <button
@@ -200,12 +253,18 @@ export function AdminSidebar() {
         <div className="border-t border-white/5 p-4">
           {/* User Profile */}
           <div className="flex items-center gap-3 rounded-xl px-3 py-2 mb-2">
-            <div className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-brand-400 to-brand-600 text-xs font-bold text-white">
-              A
+            <div className={`grid h-8 w-8 place-items-center rounded-full text-xs font-bold text-white ${
+              userRole === 'SUPER_ADMIN'
+                ? 'bg-gradient-to-br from-red-400 to-red-600'
+                : userRole === 'ADMIN'
+                  ? 'bg-gradient-to-br from-amber-400 to-amber-600'
+                  : 'bg-gradient-to-br from-brand-400 to-brand-600'
+            }`}>
+              {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">Administrator</p>
-              <p className="text-[11px] text-slate-500 truncate">admin@example.com</p>
+              <p className="text-sm font-medium text-white truncate">{userName || 'User'}</p>
+              <p className="text-[11px] text-slate-500 truncate">{userEmail}</p>
             </div>
           </div>
           {/* Sign Out */}

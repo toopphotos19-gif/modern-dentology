@@ -21,19 +21,35 @@ export const authOptions: NextAuthOptions = {
           where: { email: credentials.email }
         });
         if (!user) return null;
+        // Reject disabled users
+        if (!user.enabled) return null;
         const ok = await bcrypt.compare(credentials.password, user.password);
         if (!ok) return null;
-        return { id: user.id, email: user.email, name: user.name, role: user.role };
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          menuId: user.menuId,
+        };
       }
     })
   ],
   callbacks: {
     async jwt({ token, user }) {
-      if (user) token.role = (user as { role?: string }).role;
+      if (user) {
+        token.id = (user as any).id;
+        token.role = (user as any).role;
+        token.menuId = (user as any).menuId;
+      }
       return token;
     },
     async session({ session, token }) {
-      if (session.user) (session.user as { role?: string }).role = token.role as string;
+      if (session.user) {
+        (session.user as any).id = token.id as string;
+        (session.user as any).role = token.role as string;
+        (session.user as any).menuId = token.menuId as string | null;
+      }
       return session;
     }
   }
@@ -41,3 +57,4 @@ export const authOptions: NextAuthOptions = {
 
 export const handler = NextAuth(authOptions);
 export const auth = () => getServerSession(authOptions);
+
